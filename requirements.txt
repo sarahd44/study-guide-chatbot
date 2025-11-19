@@ -1,0 +1,9 @@
+langchain
+langchain-community
+langchain-openai
+openai
+streamlit
+beautifulsoup4
+lxml
+faiss-cpu
+python-dotenv
