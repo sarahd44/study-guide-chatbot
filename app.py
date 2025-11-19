@@ -4,7 +4,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from bs4 import BeautifulSoup
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain.chains import RetrievalQA
@@ -79,3 +79,4 @@ if question:
         st.markdown(f"**Source {i}:**")
         # Show only the first part so it's not overwhelming
         st.write(doc.page_content[:400] + "...")
+
