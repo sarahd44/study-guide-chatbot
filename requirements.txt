@@ -1,4 +1,5 @@
 langchain
+langchain-core
 langchain-community
 langchain-openai
 langchain-text-splitters
@@ -8,3 +9,4 @@ beautifulsoup4
 lxml
 faiss-cpu
 python-dotenv
+
