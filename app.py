@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain.chains import RetrievalQA
 from langchain_core.documents import Document
 
 # 1. Load environment variables (gets OPENAI_API_KEY from .env)
@@ -53,11 +52,30 @@ llm = ChatOpenAI(
     api_key=openai_api_key,
 )
 
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=retriever,
-    return_source_documents=True,  # so we can see where the answer came from
-)
+def get_answer_and_sources(question: str):
+    # 1. Retrieve relevant chunks from the vector store
+    docs = retriever.get_relevant_documents(question)
+
+    # 2. Build a context string from those chunks
+    context = "\n\n".join(doc.page_content for doc in docs)
+
+    # 3. Create a prompt that tells the model how to use the context
+    prompt = (
+        "You are helping a college student study using a course study guide.\n"
+        "Use ONLY the following context to answer the question. If the answer is not in the context, say you don't know.\n\n"
+        f"Context:\n{context}\n\n"
+        f"Question: {question}\n\n"
+        "Answer in a clear, concise way appropriate for a student."
+    )
+
+    # 4. Call the LLM
+    response = llm.invoke(prompt)
+
+    # 5. Extract the text content
+    answer_text = getattr(response, "content", str(response))
+
+    return answer_text, docs
+
 
 # 4. Streamlit UI (the "face" of your chatbot)
 st.title("Study Guide Q&A Chatbot")
@@ -67,9 +85,7 @@ question = st.text_input("Your question:")
 
 if question:
     with st.spinner("Thinking..."):
-        result = qa_chain({"query": question})
-        answer = result["result"]
-        sources = result["source_documents"]
+        answer, sources = get_answer_and_sources(question)
 
     st.subheader("Answer")
     st.write(answer)
@@ -77,6 +93,6 @@ if question:
     st.subheader("Where in the document did this come from?")
     for i, doc in enumerate(sources, start=1):
         st.markdown(f"**Source {i}:**")
-        # Show only the first part so it's not overwhelming
         st.write(doc.page_content[:400] + "...")
+
 
