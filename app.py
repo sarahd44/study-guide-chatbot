@@ -53,8 +53,8 @@ llm = ChatOpenAI(
 )
 
 def get_answer_and_sources(question: str):
-    # 1. Retrieve relevant chunks from the vector store
-    docs = retriever.get_relevant_documents(question)
+    # 1. Retrieve relevant chunks from the vector store (new LangChain style)
+    docs = retriever.invoke(question)
 
     # 2. Build a context string from those chunks
     context = "\n\n".join(doc.page_content for doc in docs)
@@ -94,5 +94,6 @@ if question:
     for i, doc in enumerate(sources, start=1):
         st.markdown(f"**Source {i}:**")
         st.write(doc.page_content[:400] + "...")
+
 
 
